@@ -6,7 +6,7 @@ interface MoveSetProps {
 
 export const MoveSet = (props: MoveSetProps) => {
     return (
-        <table>
+        <table className="block overflow-y-scroll h-96 border rounded-lg no-scrollbar">
             <tbody>
                 {
                     props.moves.map(move => <tr key={move.name}>
