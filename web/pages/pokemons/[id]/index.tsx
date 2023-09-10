@@ -9,6 +9,7 @@ import { useRouter } from "next/router"
 import { Arrow } from "../../../components/Arrow"
 import { AppContext } from "../../../context/context"
 import { LearnMethod, LearnVersion, Move, MoveDetail } from "../../../models/move"
+import { MoveSet } from "../../../components/MoveSet"
 
 interface PokemonInfoPageProps {
     data: PokemonInfo
@@ -88,17 +89,7 @@ export default function PokemonInfoPage(props: PokemonInfoPageProps) {
                     </div>
                     <div>
                         <p>Moveset</p>
-                        <table>
-                            {
-                                props.data.moves.map((move) => {
-                                    return (
-                                        <tr>
-                                            <td><p> {titleCase(move.name)}</p></td>
-                                        </tr>
-                                    )
-                                })
-                            }
-                        </table>
+                        <MoveSet moves={props.data.moves} />
 
                     </div>
                 </div>
@@ -130,7 +121,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         let moves = data.moves.map((m: any) => {
             let move: Move = {
-                name: m.move.name,
+                name: titleCase(m.move.name),
                 url: m.move.url,
                 details: []
             }
@@ -147,13 +138,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             return move
         })
 
+        const imgUrl = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${String(data.id).padStart(3, '0')}.png`
 
         return {
             props: {
                 data: {
                     id: data.id,
                     name: data.name,
-                    imageURL: `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${String(data.id).padStart(3, '0')}.png`,
+                    imageURL: imgUrl,
                     stats: stats,
                     totalStats: sumArray(data.stats),
                     type1: capitalize(data.types[0].type.name),
