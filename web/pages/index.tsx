@@ -3,12 +3,18 @@ import PokemonCard from '../components/PokemonCard'
 import { useEffect, useState } from 'react'
 import { Pokemon } from '../models/pokemon'
 import InfiniteScroll from 'react-infinite-scroll-component'
+import { GetServerSideProps } from 'next'
 
-export default function Home() {
+interface HomePageProps {
+  data: Pokemon[]
+  error: any
+}
 
-  var [pkmList, setPkmList] = useState([] as Pokemon[])
+export default function Home(props: HomePageProps) {
+
+  var [pkmList, setPkmList] = useState(props.data)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(1)
 
 
   async function fetchPokemon() {
@@ -29,10 +35,6 @@ export default function Home() {
       setPage(prev => prev + 1)
     })
   }
-
-  useEffect(() => {
-    fetchPokemon()
-  }, [])
 
   return (
     <>
@@ -64,4 +66,30 @@ export default function Home() {
       </main>
     </>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    var offset = 0
+    var resp = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20&offset=' + offset)
+    var results = await resp.json()
+    var data: Pokemon[] = results.results.map((pkm: Pokemon, idx: number) => {
+      pkm.id = idx + 1 + offset
+      pkm.imageURL = `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${String(idx + 1 + offset).padStart(3, '0')}.png`
+      return pkm
+    })
+    console.log(data)
+    return {
+      props: {
+        data: data,
+      }
+    }
+  } catch (e: any) {
+    console.log(e)
+    return {
+      props: {
+        error: e.toString()
+      }
+    }
+  }
 }
